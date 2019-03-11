@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <time.h>
-
 #define BST (+1)
 #define CCT (+8)
 
@@ -22,6 +21,7 @@ main ()
 	struct sockaddr_in address;
 	int result;
 	char ch = 'A';
+	char *local;
 
 	/*  Create a socket for the client.  */
 
@@ -44,12 +44,11 @@ main ()
 		exit (1);
 	}
 
-	/*           */
 	
   	time_t rawtime;
   	struct tm *info;
 
-  	time(&rawtime);
+  	time(&rawtime); 
  	/* Get GMT time */
  	info = gmtime(&rawtime );
   	write (sockfd, &ch, 1);
@@ -62,15 +61,21 @@ main ()
  	printf("London : %2d:%02d\n", (info->tm_hour+BST)%24, info->tm_min);
  	
 	
-
-
-
+	/*
+	time_t czas;
+    	time( & czas );
+    	printf( "Czas lokalny: %s", asctime( localtime( & czas ) ) );
+    	printf( "Czas UTC: %s", asctime( gmtime( & czas ) ) );
+	
+	*local.asctime( localtime( & czas ) );
+	write (sockfd, &*local, 1);
+	*/
 
 
 	/*  We can now read/write via sockfd.  */
-	//write (sockfd, &ch, 1);
+	write (sockfd, &ch, 1);
 	read (sockfd, &ch, 1);
-	//printf ("char from server = %c\n", ch);
+	printf ("char from server = %c\n", ch);
 	close (sockfd);
 	exit (0);
 }
