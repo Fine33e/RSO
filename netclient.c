@@ -9,19 +9,59 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <time.h>
-#define BST (+1)
-#define CCT (+8)
+#include "message.c"
 
 
-int
-main ()
+static int request_counter = 0;
+
+static int id = 1;
+int get_next_id(){
+    return id++;
+}
+
+void send_time_request(int sockfd){
+    request_counter++;
+    printf("Send time request\n");
+    message request;
+    char code [4] = TIME_REQUEST_CODE;
+    write_message_code(&request, code);
+    write_rq_id(&request, get_next_id());
+    //byte * buffor = serialize_message(&request);
+    write (sockfd, buffor, get_message_size());
+    free(buffor);
+}
+
+void read_and_handle_data(int sockfd){
+	byte * buffor = (byte*) malloc(get_message_size());
+
+	while(1){
+	message response;
+
+		if(strcmp(message_code, TIME_RESPONSE_CODE) == 0) {
+            		request_counter--;
+           		int len = get_length(&response);
+            		char *msg = get_time(&response, len);
+            		printf("The time: %s\n", msg);
+		}
+
+
+
+
+
+
+
+	}
+
+}
+
+
+int main ()
 {
 	int sockfd;
 	socklen_t len;
 	struct sockaddr_in address;
 	int result;
-	char ch = 'A';
-	char *local;
+	
 
 	/*  Create a socket for the client.  */
 
@@ -43,39 +83,16 @@ main ()
 		perror ("oops: netclient");
 		exit (1);
 	}
-
+  	
 	
-  	time_t rawtime;
-  	struct tm *info;
-
-  	time(&rawtime); 
- 	/* Get GMT time */
- 	info = gmtime(&rawtime );
-  	write (sockfd, &ch, 1);
-	printf("Current world clock:\n");
-	
-	write (sockfd, &ch, 1);
-	printf("China  : %2d:%02d\n", (info->tm_hour+CCT)%24, info->tm_min);
-
-	write (sockfd, &ch, 1);
- 	printf("London : %2d:%02d\n", (info->tm_hour+BST)%24, info->tm_min);
- 	
-	
-	/*
-	time_t czas;
-    	time( & czas );
-    	printf( "Czas lokalny: %s", asctime( localtime( & czas ) ) );
-    	printf( "Czas UTC: %s", asctime( gmtime( & czas ) ) );
-	
-	*local.asctime( localtime( & czas ) );
-	write (sockfd, &*local, 1);
-	*/
 
 
 	/*  We can now read/write via sockfd.  */
-	write (sockfd, &ch, 1);
-	read (sockfd, &ch, 1);
-	printf ("char from server = %c\n", ch);
+	
+	write (sockfd, NULL, 1);
+	
+	read_and_handle_data(sockfd);
+	
 	close (sockfd);
 	exit (0);
 }

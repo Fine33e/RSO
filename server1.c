@@ -4,9 +4,40 @@
 #include <netinet/in.h>
 #include <signal.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
+#include "message.c"
 
-int
-main ()
+
+void send_time_response(int sockfd, message * request){
+    int id = get_rq_id(request);
+    message response;
+    byte code [4] = TIME_RESPONSE_CODE;
+
+
+    time_t current_time = time(NULL);
+    char * formatted_current_time = ctime(&current_time);
+    int formated_current_time_len = strlen(formatted_current_time);
+    printf("Length: %d\n", formated_current_time_len);
+
+    write_message_code(&response, code);
+    write_rq_id(&response, id);
+    write_length(&response, formated_current_time_len);
+    write_time(&response, formatted_current_time, formated_current_time_len);
+
+    //byte * buffor = serialize_message(&response);
+
+    write (sockfd, buffor, get_message_size());
+    free(buffor);
+    printf("Send time response\n");
+}
+
+
+
+
+
+
+int main ()
 {
 	int server_sockfd, client_sockfd;
 	socklen_t server_len, client_len;
@@ -27,7 +58,7 @@ main ()
 
 	while (1)
 	{
-		char ch;
+		
 
 		printf ("server waiting\n");
 
@@ -38,13 +69,16 @@ main ()
 				(struct sockaddr *) &client_address,
 				&client_len);
 
-		/*  We can now read/write to the client on client_sockfd.
-			The five second delay is just for this demonstration.  */
+	
+		if(strcmp(message_code, TIME_REQUEST_CODE) == 0){
+			send_time_response(client_sockfd, &request);
+		}
 
-		read (client_sockfd, &ch, 1);
-		sleep (5);
-		ch++;
-		write (client_sockfd, &ch, 1);
-		close (client_sockfd);
+		
+
+		else{
+			close (client_sockfd);	
+		}
+	
 	}
 }
